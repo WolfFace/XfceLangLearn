@@ -1,0 +1,10 @@
+[Xfce Panel]
+Type=X-XFCE-PanelPlugin
+Encoding=UTF-8
+Name=LangLearn
+Name[en]=LangLearn
+Comment=Program to learn languages
+Icon=gnome-fs-executable
+X-XFCE-Module=langlearn
+X-XFCE-Module-Path=/usr/lib/x86_64-linux-gnu/xfce4/panel-plugins
+X-XFCE-API=2.0
