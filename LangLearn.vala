@@ -47,11 +47,23 @@ class LangLearn {
     }
   }
 
-  public Sentence addSentence(string sentence) {
+  public Sentence? addSentence(string sentence) {
     string query = """
-      INSERT INTO Sentence(markup, dateadd) VALUES('%s', date('now'))
-    """.printf(Base64.encode(sentence.data));
-    db.exec(query, null, null);
+      INSERT INTO Sentence(markup, dateadd) VALUES($S, date('now'))
+    """;
+    Statement stmt;
+    int ec = db.prepare_v2(query, query.length, out stmt);
+    if (ec != Sqlite.OK) {
+      stderr.printf ("Error: %d: %s\n", db.errcode (), db.errmsg ());
+      return null;
+    }
+    int ppos = stmt.bind_parameter_index("$S");
+    assert(ppos > 0);
+    stmt.bind_text(ppos, sentence);
+    if (stmt.step () != Sqlite.DONE) {
+      stderr.printf("Error: %d: %s\n", db.errcode(), db.errmsg());
+      return null;
+    }
     return new Sentence(db.last_insert_rowid(), sentence, new GLib.DateTime.now_local(), false);
   }
 
