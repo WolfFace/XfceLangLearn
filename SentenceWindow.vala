@@ -1,14 +1,15 @@
-class Sentence : Gtk.Window {
+class SentenceWindow : Gtk.Window {
 
   public const int OCCUR_FADE_INTERVAL = 500;
 
+  Sentence sentence;
   public Gtk.Label label;
   private int64 animationStartTime;
   private double animationStartOpacity;
   private double animationTargetOpacity;
   private int animationTimeInterval;
 
-  public Sentence() {
+  public SentenceWindow() {
     set_type_hint(Gdk.WindowTypeHint.DOCK);
     set_keep_above(true);
     set_app_paintable(true);
@@ -44,8 +45,9 @@ class Sentence : Gtk.Window {
     return true;
   }
 
-  public void set_text(string text) {
-    label.set_markup(text);
+  public void set_sentence(Sentence s) {
+    sentence = s;
+    label.set_markup(s.markup);
   }
 
   public void move_to_plugin() {

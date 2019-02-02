@@ -6,9 +6,9 @@ class Plugin : Xfce.PanelPlugin {
   public static Plugin plugin;
 
   public Controls controls;
-  public Sentence sentence;
+  public SentenceWindow sentence;
   public LangLearn langLearn;
-  public Queue<string> queue;
+  public Queue<Sentence> queue;
 
   public override void @construct() {
     Plugin.plugin = this;
@@ -18,9 +18,9 @@ class Plugin : Xfce.PanelPlugin {
     destroy.connect(() => { Gtk.main_quit (); });
 
     langLearn = new LangLearn(".langlearn.db");
-    List<string> today = langLearn.todaySentences();
-    queue = new Queue<string>();
-    foreach (string s in today) {
+    List<Sentence> today = langLearn.todaySentences();
+    queue = new Queue<Sentence>();
+    foreach (Sentence s in today) {
       queue.push_tail(s);
     }
 
@@ -28,7 +28,7 @@ class Plugin : Xfce.PanelPlugin {
     controls.sentence_added.connect(sentence_add);
     add(controls);
 
-    sentence = new Sentence();
+    sentence = new SentenceWindow();
 
     startTimer();
 
@@ -36,17 +36,17 @@ class Plugin : Xfce.PanelPlugin {
   }
 
   public void sentence_add(string markup) {
-    langLearn.addSentence(markup);
-    queue.push_tail(markup);
+    Sentence s = langLearn.addSentence(markup);
+    queue.push_tail(s);
   }
 
   public void occur_next_sentence() {
     if (queue.length == 0) {
       return;
     }
-    string next_sentence = queue.pop_head();
+    Sentence next_sentence = queue.pop_head();
     queue.push_tail(next_sentence);
-    sentence.set_text(next_sentence);
+    sentence.set_sentence(next_sentence);
     sentence.occur();
   }
 
@@ -57,7 +57,7 @@ class Plugin : Xfce.PanelPlugin {
 
   public bool timerLoop() {
     sentence.fade();
-    GLib.Timeout.add_full(Priority.DEFAULT, Sentence.OCCUR_FADE_INTERVAL, () => {
+    GLib.Timeout.add_full(Priority.DEFAULT, SentenceWindow.OCCUR_FADE_INTERVAL, () => {
       occur_next_sentence();
       GLib.Timeout.add_full(Priority.DEFAULT, 5000, timerLoop);
       return false;
