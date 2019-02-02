@@ -86,7 +86,7 @@ class LangLearn {
     List<Sentence> list = new List<Sentence>();
     while (stmt.step () == Sqlite.ROW) {
       var id = int64.parse(stmt.column_text(0));
-      var markup = (string) GLib.Base64.decode(stmt.column_text(1));
+      var markup = (string) stmt.column_text(1);
       var datestr = (string) stmt.column_text(2);
       GLib.DateTime date = new GLib.DateTime.local(
         int.parse(datestr.substring(0, 3)),
