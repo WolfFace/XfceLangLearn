@@ -47,23 +47,15 @@ class LangLearn {
     }
   }
 
-  public Sentence? addSentence(string sentence) {
+  public Sentence addSentence(string sentence) {
     string query = """
       INSERT INTO Sentence(markup, dateadd) VALUES($S, date('now'))
     """;
     Statement stmt;
     int ec = db.prepare_v2(query, query.length, out stmt);
-    if (ec != Sqlite.OK) {
-      stderr.printf ("Error: %d: %s\n", db.errcode (), db.errmsg ());
-      return null;
-    }
     int ppos = stmt.bind_parameter_index("$S");
     assert(ppos > 0);
     stmt.bind_text(ppos, sentence);
-    if (stmt.step () != Sqlite.DONE) {
-      stderr.printf("Error: %d: %s\n", db.errcode(), db.errmsg());
-      return null;
-    }
     return new Sentence(db.last_insert_rowid(), sentence, new GLib.DateTime.now_local(), false);
   }
 
@@ -78,10 +70,6 @@ class LangLearn {
 
     Statement stmt;
     int ec = db.prepare_v2 (query, query.length, out stmt);
-    if (ec != Sqlite.OK) {
-      stderr.printf ("Error: %d: %s\n", db.errcode (), db.errmsg ());
-      return new List<Sentence>();
-    }
 
     List<Sentence> list = new List<Sentence>();
     while (stmt.step () == Sqlite.ROW) {
@@ -99,6 +87,35 @@ class LangLearn {
     }
 
     return list;
+  }
+
+  public string? getPropertyValue(string key) {
+    string query = "SELECT value FROM Property WHERE key=$S";
+    Statement stmt;
+    int ec = db.prepare_v2(query, query.length, out stmt);
+    int ppos = stmt.bind_parameter_index("$S");
+    assert(ppos > 0);
+    stmt.bind_text(ppos, key);
+    stmt.step();
+    if (stmt.data_count() == 0) {
+      return null;
+    }
+    return stmt.column_text(0);
+  }
+
+  public void setPropertyValue(string key, string v) {
+    string query = """
+      INSERT OR REPLACE INTO Property(key, value) VALUES($KEY, $VALUE)
+    """;
+    Statement stmt;
+    int ec = db.prepare_v2(query, query.length, out stmt);
+    int kppos = stmt.bind_parameter_index("$KEY");
+    int vppos = stmt.bind_parameter_index("$VALUE");
+    assert( kppos > 0 );
+    assert( vppos > 0 );
+    stmt.bind_text(kppos, key);
+    stmt.bind_text(vppos, v);
+    stmt.step();
   }
 
   // Loop to check day changing, cleaning temporary date, etc...
