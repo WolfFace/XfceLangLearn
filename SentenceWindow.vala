@@ -2,7 +2,7 @@ class SentenceWindow : Gtk.Window {
 
   public const int OCCUR_FADE_INTERVAL = 500;
 
-  Sentence sentence;
+  Sentence? sentence;
   public Gtk.Label label;
   private int64 animationStartTime;
   private double animationStartOpacity;
@@ -20,6 +20,8 @@ class SentenceWindow : Gtk.Window {
 
     label = new Gtk.Label("");
 
+    sentence = null;
+
     var hbox = new Gtk.Box(Gtk.Orientation.HORIZONTAL, 0);
     hbox.pack_start(label, false, false, 8);
     add(hbox);
@@ -32,6 +34,7 @@ class SentenceWindow : Gtk.Window {
 
   private bool opacityAnimation() {
     var now = GLib.get_monotonic_time() / 1000;
+    move_to_plugin();
     if (now-animationStartTime >= animationTimeInterval) {
       set_opacity(animationTargetOpacity);
       return true;
@@ -41,13 +44,21 @@ class SentenceWindow : Gtk.Window {
       + (double)(now-animationStartTime)/animationTimeInterval
       * (animationTargetOpacity-animationStartOpacity)
     );
-    move_to_plugin();
     return true;
   }
 
-  public void set_sentence(Sentence s) {
+  public void set_sentence(Sentence? s) {
     sentence = s;
     label.set_markup(s.markup);
+    // awful trick to redraw
+    GLib.Timeout.add_full(Priority.HIGH, 1, () => {
+      set_opacity(get_opacity()*0.5);
+      return false;
+    });
+  }
+
+  public Sentence? get_sentence() {
+    return sentence;
   }
 
   public void move_to_plugin() {
@@ -93,7 +104,11 @@ class SentenceWindow : Gtk.Window {
 
   private bool on_draw(Cairo.Context cr) {
     cr.save();
-    cr.set_source_rgba(0.25, 0, 1, 0.8);
+    if (sentence != null && sentence.readed) {
+      cr.set_source_rgba(0.0, 0.25, 0, 0.8);
+    } else {
+      cr.set_source_rgba(0.25, 0, 1, 0.8);
+    }
     cr.set_operator(Cairo.Operator.SOURCE);
     cr.paint();
     cr.restore();

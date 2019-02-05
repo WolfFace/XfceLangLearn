@@ -26,6 +26,7 @@ class Plugin : Xfce.PanelPlugin {
 
     controls = new Controls();
     controls.sentence_added.connect(sentence_add);
+    controls.readed_clicked.connect(sentence_set_readed);
     add(controls);
 
     sentence = new SentenceWindow();
@@ -38,6 +39,15 @@ class Plugin : Xfce.PanelPlugin {
   public void sentence_add(string markup) {
     Sentence s = langLearn.addSentence(markup);
     queue.push_tail(s);
+  }
+
+  public void sentence_set_readed() {
+    Sentence? s = sentence.get_sentence();
+    if (s != null) {
+      langLearn.setSentenceReaded(s.id);
+      s.readed = true;
+      sentence.set_sentence(s); // redraw
+    }
   }
 
   public void occur_next_sentence() {

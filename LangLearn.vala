@@ -59,6 +59,15 @@ class LangLearn {
     return new Sentence(db.last_insert_rowid(), sentence, new GLib.DateTime.now_local(), false);
   }
 
+  public void setSentenceReaded(int64 id) {
+    string query = ("UPDATE Sentence SET readed = 'TRUE' WHERE id=%" + int64.FORMAT).printf(id);
+    string errmsg;
+    int ec = db.exec(query, null, out errmsg);
+    if (ec != Sqlite.OK) {
+      stderr.printf("Error: %s\n", errmsg);
+    }
+  }
+
   public List<Sentence> todaySentences() {
     string query = """
       SELECT id, markup, dateadd, readed FROM Sentence WHERE (
@@ -82,7 +91,7 @@ class LangLearn {
         int.parse(datestr.substring(8, 2)),
         0, 0, 0
       );
-      var readed = bool.parse( stmt.column_text(3) );
+      var readed = bool.parse( stmt.column_text(3).down() );
       list.append( new Sentence(id, markup, date, readed) );
     }
 
