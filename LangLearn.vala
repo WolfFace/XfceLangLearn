@@ -45,6 +45,8 @@ class LangLearn {
     if (ec != Sqlite.OK) {
       stderr.printf("Error: %s\n", errmsg);
     }
+
+    GLib.Timeout.add_full(Priority.DEFAULT, 1000, loop);
   }
 
   public Sentence addSentence(string sentence) {
@@ -62,10 +64,13 @@ class LangLearn {
   public void setSentenceReaded(int64 id) {
     string query = ("UPDATE Sentence SET readed = 'TRUE' WHERE id=%" + int64.FORMAT).printf(id);
     string errmsg;
-    int ec = db.exec(query, null, out errmsg);
-    if (ec != Sqlite.OK) {
-      stderr.printf("Error: %s\n", errmsg);
-    }
+    db.exec(query, null, out errmsg);
+  }
+
+  public void sentencesUnread() {
+    string query = "UPDATE Sentence SET readed = 'FALSE' WHERE 1=1";
+    string errmsg;
+    db.exec(query, null, out errmsg);
   }
 
   public List<Sentence> todaySentences() {
@@ -128,9 +133,44 @@ class LangLearn {
   }
 
   // Loop to check day changing, cleaning temporary date, etc...
-  private void loop() {
-
+  private bool loop() {
+    morning_check();
+    return true;
   }
 
+  private DateTime strToDateTime(string datestr) {
+    return new GLib.DateTime.local(
+      int.parse(datestr.substring(0, 3)),
+      int.parse(datestr.substring(5, 2)),
+      int.parse(datestr.substring(8, 2)),
+      int.parse(datestr.substring(11, 2)),
+      int.parse(datestr.substring(14, 2)),
+      int.parse(datestr.substring(17, 2))
+    );
+  }
+
+  private void morning_check() {
+    var datestr = getPropertyValue("lastDateTimeTick");
+    var currentDateTime = new GLib.DateTime.now_local();
+    var dateTime = new GLib.DateTime.now_local();
+    if (datestr != null) {
+      stderr.printf("\n\n%s\n\n", datestr);
+      dateTime = strToDateTime(datestr);
+    }
+
+    // it's ok to have unexplainable behavior once per year
+    var dayAlpha = currentDateTime.get_day_of_week() - dateTime.get_day_of_week();
+    if (dayAlpha == 0 && currentDateTime.get_hour()>=6 && dateTime.get_hour()<6
+        || dayAlpha==1 && dateTime.get_hour()<6 || dayAlpha>2) {
+      sentencesUnread();
+      sentence_list_changed();
+    }
+
+    setPropertyValue(
+      "lastDateTimeTick",
+      new GLib.DateTime.now_local().format("%Y:%m:%d %H:%M:%S")
+    ); // 0000:00:00 00:00:00
+
+  }
 
 }
