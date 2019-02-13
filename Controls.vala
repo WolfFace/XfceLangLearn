@@ -5,6 +5,7 @@ class Controls : Gtk.Box {
   // private Gtk.Button next_btn;
   private Gtk.Button menu_btn;
   private Gtk.Menu menu;
+  public Gtk.CheckMenuItem only_unreaded_item;
   private AddSentence add_sentence_window;
 
   public signal void sentence_added(string markup);
@@ -25,11 +26,14 @@ class Controls : Gtk.Box {
     menu = new Gtk.Menu();
     menu.attach_to_widget(menu_btn, null);
 
-    Gtk.MenuItem menu_item = new Gtk.MenuItem.with_label("Add sentence");
+    var add_sentence_item = new Gtk.MenuItem.with_label("Add sentence");
     add_sentence_window = new AddSentence();
     add_sentence_window.added.connect(s => sentence_added(s));
-    menu_item.activate.connect(() => add_sentence_window.show_all());
-    menu.add(menu_item);
+    add_sentence_item.activate.connect(() => add_sentence_window.show_all());
+    menu.add(add_sentence_item);
+
+    only_unreaded_item = new Gtk.CheckMenuItem.with_label("Only unreaded");
+    menu.add(only_unreaded_item);
 
     menu.show_all();
 

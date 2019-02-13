@@ -9,6 +9,7 @@ class Plugin : Xfce.PanelPlugin {
   public SentenceWindow sentence;
   public LangLearn langLearn;
   public Queue<Sentence> queue;
+  public int unreaded_sentences;
 
   public override void @construct() {
     Plugin.plugin = this;
@@ -20,8 +21,10 @@ class Plugin : Xfce.PanelPlugin {
     langLearn = new LangLearn(".langlearn.db");
     List<Sentence> today = langLearn.todaySentences();
     queue = new Queue<Sentence>();
+    unreaded_sentences = 0;
     foreach (Sentence s in today) {
       queue.push_tail(s);
+      if (!s.readed) unreaded_sentences++;
     }
 
     controls = new Controls();
@@ -38,24 +41,27 @@ class Plugin : Xfce.PanelPlugin {
 
   public void sentence_add(string markup) {
     Sentence s = langLearn.addSentence(markup);
+    unreaded_sentences++;
     queue.push_tail(s);
   }
 
   public void sentence_set_readed() {
     Sentence? s = sentence.get_sentence();
-    if (s != null) {
+    if (s != null && unreaded_sentences>0) {
       langLearn.setSentenceReaded(s.id);
       s.readed = true;
+      unreaded_sentences--;
       sentence.set_sentence(s); // redraw
     }
   }
 
   public void occur_next_sentence() {
-    if (queue.length == 0) {
-      return;
-    }
-    Sentence next_sentence = queue.pop_head();
-    queue.push_tail(next_sentence);
+    if (unreaded_sentences < 1 && controls.only_unreaded_item.active || queue.length < 1) return;
+    Sentence next_sentence = queue.peek_head();
+    do {
+      next_sentence = queue.pop_head();
+      queue.push_tail(next_sentence);
+    } while (next_sentence.readed && controls.only_unreaded_item.active);
     sentence.set_sentence(next_sentence);
     sentence.occur();
   }

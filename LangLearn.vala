@@ -46,7 +46,7 @@ class LangLearn {
       stderr.printf("Error: %s\n", errmsg);
     }
 
-    GLib.Timeout.add_full(Priority.DEFAULT, 1000, loop);
+    GLib.Timeout.add_full(Priority.DEFAULT, 10000, loop);
   }
 
   public Sentence addSentence(string sentence) {
@@ -58,6 +58,7 @@ class LangLearn {
     int ppos = stmt.bind_parameter_index("$S");
     assert(ppos > 0);
     stmt.bind_text(ppos, sentence);
+    stmt.step();
     return new Sentence(db.last_insert_rowid(), sentence, new GLib.DateTime.now_local(), false);
   }
 
@@ -154,7 +155,6 @@ class LangLearn {
     var currentDateTime = new GLib.DateTime.now_local();
     var dateTime = new GLib.DateTime.now_local();
     if (datestr != null) {
-      stderr.printf("\n\n%s\n\n", datestr);
       dateTime = strToDateTime(datestr);
     }
 
