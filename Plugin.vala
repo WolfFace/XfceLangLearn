@@ -19,13 +19,8 @@ class Plugin : Xfce.PanelPlugin {
     destroy.connect(() => { Gtk.main_quit (); });
 
     langLearn = new LangLearn(".langlearn.db");
-    List<Sentence> today = langLearn.todaySentences();
-    queue = new Queue<Sentence>();
-    unreaded_sentences = 0;
-    foreach (Sentence s in today) {
-      queue.push_tail(s);
-      if (!s.readed) unreaded_sentences++;
-    }
+    langLearn.sentence_list_changed.connect(update_sentence_queue);
+    update_sentence_queue();
 
     controls = new Controls();
     controls.sentence_added.connect(sentence_add);
@@ -37,6 +32,16 @@ class Plugin : Xfce.PanelPlugin {
     startTimer();
 
     show_all();
+  }
+
+  public void update_sentence_queue() {
+    List<Sentence> today = langLearn.todaySentences();
+    queue = new Queue<Sentence>();
+    unreaded_sentences = 0;
+    foreach (Sentence s in today) {
+      queue.push_tail(s);
+      if (!s.readed) unreaded_sentences++;
+    }
   }
 
   public void sentence_add(string markup) {
