@@ -73,14 +73,14 @@ class Plugin : Xfce.PanelPlugin {
 
   public void startTimer() {
     occur_next_sentence();
-    GLib.Timeout.add_full(Priority.DEFAULT, 5000, timerLoop);
+    GLib.Timeout.add_full(Priority.DEFAULT, 10000, timerLoop);
   }
 
   public bool timerLoop() {
     sentence.fade();
     GLib.Timeout.add_full(Priority.DEFAULT, SentenceWindow.OCCUR_FADE_INTERVAL, () => {
       occur_next_sentence();
-      GLib.Timeout.add_full(Priority.DEFAULT, 5000, timerLoop);
+      GLib.Timeout.add_full(Priority.DEFAULT, 10000, timerLoop);
       return false;
     });
     return false;
