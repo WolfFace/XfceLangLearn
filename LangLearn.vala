@@ -69,10 +69,12 @@ class LangLearn {
   }
 
   public void sentencesUnread() {
-    string query = "UPDATE Sentence SET readed = 'FALSE' WHERE 1=1";
-    string errmsg;
-    // int exec_callback (int n_columns, string[] values, string[] column_names)
-    db.exec(query, () => 0, out errmsg);
+    new Thread<int>.try("add thread", () => {
+      string query = "UPDATE Sentence SET readed = 'FALSE' WHERE 1=1";
+      string errmsg;
+      db.exec(query, null, out errmsg);
+      return 0;
+    });
   }
 
   public List<Sentence> todaySentences() {
