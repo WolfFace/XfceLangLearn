@@ -71,7 +71,8 @@ class LangLearn {
   public void sentencesUnread() {
     string query = "UPDATE Sentence SET readed = 'FALSE' WHERE 1=1";
     string errmsg;
-    db.exec(query, null, out errmsg);
+    // int exec_callback (int n_columns, string[] values, string[] column_names)
+    db.exec(query, () => 0, out errmsg);
   }
 
   public List<Sentence> todaySentences() {
@@ -135,7 +136,14 @@ class LangLearn {
 
   // Loop to check day changing, cleaning temporary date, etc...
   private bool loop() {
-    morning_check();
+    morning_check_loop();
+
+    // var current = new GLib.DateTime.local(2019, 02, 14, 5, 50, 0);
+    // var prev = new GLib.DateTime.local(2019, 02, 13, 5, 5, 0);
+    // if (is_morning_pass(current, prev)) {
+    //   stderr.printf("\n\n\nNEW DAY\n\n\n");
+    // }
+
     return true;
   }
 
@@ -150,27 +158,31 @@ class LangLearn {
     );
   }
 
-  private void morning_check() {
+  private void morning_check_loop() {
     var datestr = getPropertyValue("lastDateTimeTick");
-    var currentDateTime = new GLib.DateTime.now_local();
-    var dateTime = new GLib.DateTime.now_local();
+    var current = new GLib.DateTime.now_local();
+    var prev = new GLib.DateTime.now_local();
     if (datestr != null) {
-      dateTime = strToDateTime(datestr);
+      prev = strToDateTime(datestr);
     }
-
-    // it's ok to have unexplainable behavior once per year
-    var dayAlpha = currentDateTime.get_day_of_week() - dateTime.get_day_of_week();
-    if (dayAlpha == 0 && currentDateTime.get_hour()>=6 && dateTime.get_hour()<6
-        || dayAlpha==1 && dateTime.get_hour()<6 || dayAlpha>2) {
+    if (is_morning_pass(current, prev)) {
       sentencesUnread();
       sentence_list_changed();
     }
-
     setPropertyValue(
       "lastDateTimeTick",
       new GLib.DateTime.now_local().format("%Y:%m:%d %H:%M:%S")
-    ); // 0000:00:00 00:00:00
+    );
+  }
 
+  private bool is_morning_pass(GLib.DateTime current, GLib.DateTime prev) {
+    // it's ok to have unexplainable behavior once per year
+    var dayAlpha = current.get_day_of_week() - prev.get_day_of_week();
+    if (dayAlpha == 0 && current.get_hour()>=6 && prev.get_hour()<6
+        || dayAlpha==1 && prev.get_hour()<6 || dayAlpha>2) {
+      return true;
+    }
+    return false;
   }
 
 }
