@@ -52,7 +52,7 @@ class Plugin : Xfce.PanelPlugin {
 
   public void sentence_set_readed() {
     Sentence? s = sentence.get_sentence();
-    if (s != null && unreaded_sentences>0) {
+    if (s != null && unreaded_sentences>0 && !s.readed) {
       langLearn.setSentenceReaded(s.id);
       s.readed = true;
       unreaded_sentences--;
