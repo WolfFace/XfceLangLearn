@@ -29,17 +29,17 @@ class SentenceWindow : Gtk.Window {
     realize();
 
     GLib.Timeout.add_full(Priority.HIGH, 1, opacityAnimation);
-    set_opacity(0.0);
+    ((Gtk.Widget) this).set_opacity(0.0);
   }
 
   private bool opacityAnimation() {
     var now = GLib.get_monotonic_time() / 1000;
     move_to_plugin();
     if (now-animationStartTime >= animationTimeInterval) {
-      set_opacity(animationTargetOpacity);
+      ((Gtk.Widget) this).set_opacity(animationTargetOpacity);
       return true;
     }
-    set_opacity(
+    ((Gtk.Widget) this).set_opacity(
       animationStartOpacity
       + (double)(now-animationStartTime)/animationTimeInterval
       * (animationTargetOpacity-animationStartOpacity)
@@ -52,7 +52,7 @@ class SentenceWindow : Gtk.Window {
     label.set_markup(s.markup);
     // awful trick to redraw
     GLib.Timeout.add_full(Priority.HIGH, 1, () => {
-      set_opacity(get_opacity()*0.5);
+      ((Gtk.Widget) this).set_opacity(((Gtk.Widget) this).get_opacity()*0.5);
       return false;
     });
   }
@@ -81,7 +81,7 @@ class SentenceWindow : Gtk.Window {
     var start_time = GLib.get_monotonic_time() / 1000;
     animationTargetOpacity = opacity;
     animationStartTime = start_time;
-    animationStartOpacity = get_opacity();
+    animationStartOpacity = ((Gtk.Widget) this).get_opacity();
     animationTimeInterval = interval;
   }
 
