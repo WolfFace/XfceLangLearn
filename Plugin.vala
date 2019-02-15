@@ -61,7 +61,11 @@ class Plugin : Xfce.PanelPlugin {
   }
 
   public void occur_next_sentence() {
-    if (unreaded_sentences < 1 && controls.only_unreaded_item.active || queue.length < 1) return;
+    if (unreaded_sentences < 1
+        && controls.only_unreaded_item.active
+        || queue.length < 1) {
+      return;
+    }
     Sentence next_sentence = queue.peek_head();
     do {
       next_sentence = queue.pop_head();

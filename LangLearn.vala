@@ -140,7 +140,7 @@ class LangLearn {
   private bool loop() {
     morning_check_loop();
 
-    // var current = new GLib.DateTime.local(2019, 02, 14, 5, 50, 0);
+    // var current = new GLib.DateTime.local(2019, 02, 14, 6, 10, 0);
     // var prev = new GLib.DateTime.local(2019, 02, 13, 5, 5, 0);
     // if (is_morning_pass(current, prev)) {
     //   stderr.printf("\n\n\nNEW DAY\n\n\n");
@@ -151,7 +151,7 @@ class LangLearn {
 
   private DateTime strToDateTime(string datestr) {
     return new GLib.DateTime.local(
-      int.parse(datestr.substring(0, 3)),
+      int.parse(datestr.substring(0, 4)),
       int.parse(datestr.substring(5, 2)),
       int.parse(datestr.substring(8, 2)),
       int.parse(datestr.substring(11, 2)),
@@ -167,6 +167,8 @@ class LangLearn {
     if (datestr != null) {
       prev = strToDateTime(datestr);
     }
+    // stderr.printf("\n\n\n%s\n", current.format("%Y:%m:%d %H:%M:%S"));
+    // stderr.printf("%s\n\n\n", prev.format("%Y:%m:%d %H:%M:%S"));
     if (is_morning_pass(current, prev)) {
       sentencesUnread();
       sentence_list_changed();
@@ -179,7 +181,7 @@ class LangLearn {
 
   private bool is_morning_pass(GLib.DateTime current, GLib.DateTime prev) {
     // it's ok to have unexplainable behavior once per year
-    var dayAlpha = current.get_day_of_week() - prev.get_day_of_week();
+    var dayAlpha = current.get_day_of_year() - prev.get_day_of_year();
     if (dayAlpha == 0 && current.get_hour()>=6 && prev.get_hour()<6
         || dayAlpha==1 && prev.get_hour()<6 || dayAlpha>2) {
       return true;
