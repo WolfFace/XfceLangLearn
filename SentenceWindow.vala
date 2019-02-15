@@ -3,6 +3,7 @@ class SentenceWindow : Gtk.Window {
   public const int OCCUR_FADE_INTERVAL = 500;
 
   Sentence? sentence;
+  private Gtk.Box box;
   public Gtk.Label label;
   private int64 animationStartTime;
   private double animationStartOpacity;
@@ -22,9 +23,9 @@ class SentenceWindow : Gtk.Window {
 
     sentence = null;
 
-    var hbox = new Gtk.Box(Gtk.Orientation.HORIZONTAL, 0);
-    hbox.pack_start(label, false, false, 8);
-    add(hbox);
+    box = new Gtk.Box(Gtk.Orientation.HORIZONTAL, 0);
+    box.pack_start(label, false, false, 8);
+    add(box);
     show_all();
     realize();
 
@@ -55,6 +56,10 @@ class SentenceWindow : Gtk.Window {
       ((Gtk.Widget) this).set_opacity(((Gtk.Widget) this).get_opacity()*0.5);
       return false;
     });
+    int mw, nw, mh, nh;
+    box.get_preferred_width(out mw, out nw);
+    box.get_preferred_height(out mh, out nh);
+    resize(mw, mh);
   }
 
   public Sentence? get_sentence() {
