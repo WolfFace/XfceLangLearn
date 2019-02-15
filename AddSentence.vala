@@ -9,8 +9,8 @@ class AddSentence : Gtk.Window {
     set_title("Add sentence");
     var vBox = new Gtk.Box(Gtk.Orientation.VERTICAL, 0);
 
-    vBox.margin_left = 5;
-    vBox.margin_right = 5;
+    vBox.margin_start = 5;
+    vBox.margin_end = 5;
 
     sentenceField = new Gtk.Entry();
     sentenceField.set_width_chars(50);
